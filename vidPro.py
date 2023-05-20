@@ -1,5 +1,36 @@
 import numpy as np
 import cv2
+from skimage.feature import local_binary_pattern
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+
+# Funkcija za izračun LBP značilnic
+def calculate_lbp(image):
+    # Pretvorba slike v sivinsko območje
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # Izračun LBP značilnic
+    lbp = local_binary_pattern(gray, 8, 1, method='uniform')
+    hist, _ = np.histogram(lbp.ravel(), bins=np.arange(0, 10), range=(0, 10))
+    hist = hist.astype("float")
+    hist /= (hist.sum() + 1e-7)
+    return hist
+
+# Branje in predobdelava podatkov
+def preprocess_data():
+    # Branje slik in pridobivanje LBP značilnic ter oznak
+    images = []
+    labels = []
+    for i in range(num_samples):
+        image = cv2.imread(f"path/to/images/{i}.jpg")
+        faces = face_cascade.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5)
+        for (x, y, w, h) in faces:
+            face_image = image[y:y+h, x:x+w]
+            lbp_features = calculate_lbp(face_image)
+            images.append(lbp_features)
+            labels.append(class_label)  # Nastavite ustrezno oznako glede na razpoznavni razred
+    return images, labels
 
 video_capture = cv2.VideoCapture(0)
 
