@@ -109,82 +109,6 @@ def zaznajObrazSlika(path):
     cv2.destroyAllWindows()
 
 
-"""with open("lenna.png", "rb") as f:
-    image_data = f.read()
-
-# Ustvarite slovar z binarnimi podatki slike
-mydict = {
-    "image": Binary(image_data),
-    "isTeam": "1"
-}
-
-x = mycol.insert_one(mydict)
-
-if x.inserted_id:
-    print("Slika uspešno shranjena v MongoDB.")
-else:
-    print("Prišlo je do napake pri shranjevanju slike v MongoDB.")
-
-document = mycol.find_one({"isTeam": "1"})
-
-# Preverite, ali je dokument najden
-if document:
-    # Pridobite binarne podatke slike iz dokumenta
-    image_data = document["image"]
-
-    # Pretvorite binarne podatke v numpy array
-    nparr = np.frombuffer(image_data, np.uint8)
-
-    # Dekodirajte numpy array v sliko z uporabo OpenCV
-    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-    # Prikažite sliko z uporabo OpenCV
-    cv2.imshow("Slika", image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-else:
-    print("Dokument s sliko ni bil najden v MongoDB.")"""
-
-
-option = int(input('Enter your choice: '))
-if option == 1:
-    print('Dodaj novo osebo preko kamere')
-    img = zaznajObrazKamera()
-    shraniSliko(img, 1)
-elif option == 2:
-    print('Dodaj novo osebo z sliko')
-    img = zaznajObrazSlika('lenna.png')
-    shraniSliko(img, 1)
-elif option == 3:
-    slike = dobiSlike()
-    cv2.imshow("Slika", slike[1])
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    """print('Prikazi sliko iz baze')
-    document = mycol.find_one({"isTeam": "0"})
-
-    # Preverite, ali je dokument najden
-    if document:
-        # Pridobite binarne podatke slike iz dokumenta
-        image_data = document["image"]
-
-        # Pretvorite binarne podatke v numpy array
-        nparr = np.frombuffer(image_data, np.uint8)
-
-        # Dekodirajte numpy array v sliko z uporabo OpenCV
-        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-        # Prikažite sliko z uporabo OpenCV
-        cv2.imshow("Slika", image)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-    else:
-        print("Dokument s sliko ni bil najden v MongoDB.")"""
-"""face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-skupina = 1
-drugo = 0
-
-
 def get_pixel(img, center, x, y):
     new_value = 0
     try:
@@ -220,31 +144,37 @@ def lbp_calculated_pixel(img, x, y):
 
 
 # Branje in predobdelava podatkov
-def preprocess_data():
+def izlocanjeZnacilnic():
+    slike = dobiSlike()
     imageslbp = []
     labels = []
-    for images in os.listdir("C:/Users/urosm/PycharmProjects/vidPro"):
-        if (images.endswith(".png")):
-            img = cv2.imread(images)
-            faces = face_cascade.detectMultiScale(img, scaleFactor=1.1, minNeighbors=5)
-            for (x, y, w, h) in faces:
-                face_image = img[y:y + h, x:x + w]
-                print(face_image.shape)
-                height, width, _ = face_image.shape
-                face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2GRAY)
-                img_lbp = np.zeros((height, width), np.uint8)
-                for i in range(0, height):
-                    for j in range(0, width):
-                        img_lbp[i, j] = lbp_calculated_pixel(face_image, i, j)
-                imageslbp.append(img_lbp)
+    for slika in slike:
+        height, width, _ = slika.shape
+        face_image = cv2.cvtColor(slika, cv2.COLOR_BGR2GRAY)
+        img_lbp = np.zeros((height, width), np.uint8)
+        for i in range(0, height):
+            for j in range(0, width):
+                img_lbp[i, j] = lbp_calculated_pixel(face_image, i, j)
+        imageslbp.append(img_lbp)
 
-    print(imageslbp)
-    cv2.imshow("gds", imageslbp[0])
-    cv2.waitKey()
-    return images, labels
+    return imageslbp
 
 
-preprocess_data()
+
+option = int(input('Enter your choice: '))
+if option == 1:
+    print('Dodaj novo osebo preko kamere')
+    img = zaznajObrazKamera()
+    shraniSliko(img, 1)
+elif option == 2:
+    print('Dodaj novo osebo z sliko')
+    img = zaznajObrazSlika('lenna.png')
+    shraniSliko(img, 1)
+elif option == 3:
+    slike = dobiSlike()
+    cv2.imshow("Slika", slike[1])
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 cv2.waitKey()
 
-cv2.destroyAllWindows()"""
+cv2.destroyAllWindows()
