@@ -16,7 +16,61 @@ myclient = pymongo.MongoClient("mongodb+srv://vidPro:vidPro@vidpro.wsmmizs.mongo
 mydb = myclient["vidPro"]
 mycol = mydb["images"]
 
-with open("lenna.png", "rb") as f:
+
+def zaznajObrazKamera():
+    video_capture = cv2.VideoCapture(0)
+
+    # Nalaganje predhodno naučenega modela za zaznavanje obrazov
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+    # Branje prve sličice iz video posnetka
+    ret, frame = video_capture.read()
+
+    # Pretvorba sličice v sivinsko sliko (za zaznavanje obrazov je potrebna sivinska slika)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # Zaznavanje obrazov v sličici
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+    # Izrezovanje in prikazovanje zaznanih obrazov
+    for (x, y, w, h) in faces:
+        # Izrez območja z obrazom iz sličice
+        face_image = frame[y:y + h, x:x + w]
+
+        # Prikaz izrezanega obraza
+        #cv2.imshow('Face', face_image)
+
+    # Počakajte, da uporabnik pritisne tipko
+    #cv2.waitKey(0)
+
+    # Sprosti vir zajema video posnetka in zapri okno
+    return face_image
+    video_capture.release()
+    cv2.destroyAllWindows()
+
+
+def zaznajObrazSlika(path):
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+    # Naloži sliko
+    image = cv2.imread(path)
+
+    # Pretvori sliko v sivinsko sliko
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Zaznaj obraz na sliki
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+    # Označi obraz z okvirjem
+    for (x, y, w, h) in faces:
+        face_image = image[y:y + h, x:x + w]
+
+    # Prikaži sliko z označenimi obrazom
+    return face_image
+    cv2.destroyAllWindows()
+
+
+"""with open("lenna.png", "rb") as f:
     image_data = f.read()
 
 # Ustvarite slovar z binarnimi podatki slike
@@ -33,6 +87,34 @@ if x.inserted_id:
 else:
     print("Prišlo je do napake pri shranjevanju slike v MongoDB.")
 
+document = mycol.find_one({"isTeam": "1"})
+
+# Preverite, ali je dokument najden
+if document:
+    # Pridobite binarne podatke slike iz dokumenta
+    image_data = document["image"]
+
+    # Pretvorite binarne podatke v numpy array
+    nparr = np.frombuffer(image_data, np.uint8)
+
+    # Dekodirajte numpy array v sliko z uporabo OpenCV
+    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+    # Prikažite sliko z uporabo OpenCV
+    cv2.imshow("Slika", image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+else:
+    print("Dokument s sliko ni bil najden v MongoDB.")"""
+
+
+option = int(input('Enter your choice: '))
+if option == 1:
+    print('Dodaj novo osebo preko kamere')
+    img = zaznajObrazKamera()
+elif option == 2:
+    print('Dodaj novo osebo z sliko')
+    img = zaznajObrazSlika('lenna.png')
 """face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 skupina = 1
 drugo = 0
