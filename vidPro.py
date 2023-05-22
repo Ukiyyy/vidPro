@@ -11,12 +11,12 @@ from sklearn.metrics import accuracy_score
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
-
 myclient = pymongo.MongoClient("mongodb+srv://vidPro:vidPro@vidpro.wsmmizs.mongodb.net/")
 mydb = myclient["vidPro"]
 mycol = mydb["images"]
 
 
+# Funkcija, ki shrani sliko v bazo. Parameter "team" je bool, ce je iz nase mikroskupine al ne.
 def shraniSliko(img, team):
     slika_bin = cv2.imencode('.png', img)[1].tobytes()
 
@@ -33,6 +33,7 @@ def shraniSliko(img, team):
         print("Prišlo je do napake pri shranjevanju slike v MongoDB.")
 
 
+# Funkcija, ki vrne vse slike iz podatkovne baze
 def dobiSlike():
     documents = mycol.find()
 
@@ -77,10 +78,10 @@ def zaznajObrazKamera():
         face_image = frame[y:y + h, x:x + w]
 
         # Prikaz izrezanega obraza
-        #cv2.imshow('Face', face_image)
+        # cv2.imshow('Face', face_image)
 
     # Počakajte, da uporabnik pritisne tipko
-    #cv2.waitKey(0)
+    # cv2.waitKey(0)
 
     # Sprosti vir zajema video posnetka in zapri okno
     return face_image
@@ -109,7 +110,7 @@ def zaznajObrazSlika(path):
     cv2.destroyAllWindows()
 
 
-def get_pixel(img, center, x, y):
+def get_piksel(img, center, x, y):
     new_value = 0
     try:
         if img[x][y] >= center:
@@ -121,29 +122,29 @@ def get_pixel(img, center, x, y):
     return new_value
 
 
-def lbp_calculated_pixel(img, x, y):
+def lbp_zracunan_piksel(img, x, y):
     center = img[x][y]
-    val_ar = []
+    value = []
 
-    val_ar.append(get_pixel(img, center, x - 1, y - 1))
-    val_ar.append(get_pixel(img, center, x - 1, y))
-    val_ar.append(get_pixel(img, center, x - 1, y + 1))
-    val_ar.append(get_pixel(img, center, x, y + 1))
-    val_ar.append(get_pixel(img, center, x + 1, y + 1))
-    val_ar.append(get_pixel(img, center, x + 1, y))
-    val_ar.append(get_pixel(img, center, x + 1, y - 1))
-    val_ar.append(get_pixel(img, center, x, y - 1))
+    value.append(get_piksel(img, center, x - 1, y - 1))
+    value.append(get_piksel(img, center, x - 1, y))
+    value.append(get_piksel(img, center, x - 1, y + 1))
+    value.append(get_piksel(img, center, x, y + 1))
+    value.append(get_piksel(img, center, x + 1, y + 1))
+    value.append(get_piksel(img, center, x + 1, y))
+    value.append(get_piksel(img, center, x + 1, y - 1))
+    value.append(get_piksel(img, center, x, y - 1))
 
-    power_val = [1, 2, 4, 8, 16, 32, 64, 128]
-    val = 0
+    t = [1, 2, 4, 8, 16, 32, 64, 128]
+    values = 0
 
-    for i in range(len(val_ar)):
-        val += val_ar[i] * power_val[i]
+    for i in range(len(value)):
+        values += value[i] * t[i]
 
-    return val
+    return values
 
 
-# Branje in predobdelava podatkov
+# Funkcija, ki izloci iz vseh slik iz baze znacilnice(lbp)
 def izlocanjeZnacilnic():
     slike = dobiSlike()
     imageslbp = []
@@ -154,13 +155,13 @@ def izlocanjeZnacilnic():
         img_lbp = np.zeros((height, width), np.uint8)
         for i in range(0, height):
             for j in range(0, width):
-                img_lbp[i, j] = lbp_calculated_pixel(face_image, i, j)
+                img_lbp[i, j] = lbp_zracunan_piksel(face_image, i, j)
         imageslbp.append(img_lbp)
 
     return imageslbp
 
 
-
+# Za shranjevanje obrazov. Opcija 3 za testiranje, ce je slika v bazi
 option = int(input('Enter your choice: '))
 if option == 1:
     print('Dodaj novo osebo preko kamere')
@@ -169,7 +170,7 @@ if option == 1:
 elif option == 2:
     print('Dodaj novo osebo z sliko')
     img = zaznajObrazSlika('lenna.png')
-    shraniSliko(img, 1)
+    shraniSliko(img, 0)
 elif option == 3:
     slike = dobiSlike()
     cv2.imshow("Slika", slike[1])
