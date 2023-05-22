@@ -2,12 +2,38 @@ import numpy as np
 import cv2
 from skimage.feature import local_binary_pattern
 import os
+import pymongo
+from bson.binary import Binary
 from os import listdir
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+myclient = pymongo.MongoClient("mongodb+srv://vidPro:vidPro@vidpro.wsmmizs.mongodb.net/")
+mydb = myclient["vidPro"]
+mycol = mydb["images"]
+
+with open("lenna.png", "rb") as f:
+    image_data = f.read()
+
+# Ustvarite slovar z binarnimi podatki slike
+mydict = {
+    "image": Binary(image_data),
+    "isTeam": "1"
+}
+#mydict = { "image": "John", "isTeam": "1" }
+
+x = mycol.insert_one(mydict)
+
+if x.inserted_id:
+    print("Slika uspešno shranjena v MongoDB.")
+else:
+    print("Prišlo je do napake pri shranjevanju slike v MongoDB.")
+
+"""face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 skupina = 1
 drugo = 0
 
@@ -46,16 +72,6 @@ def lbp_calculated_pixel(img, x, y):
     return val
 
 
-# Funkcija za izračun LBP značilnic
-def calculate_lbp(image):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    lbp = local_binary_pattern(gray, 8, 1, method='uniform')
-    hist, _ = np.histogram(lbp.ravel(), bins=np.arange(0, 10), range=(0, 10))
-    hist = hist.astype("float")
-    hist /= (hist.sum() + 1e-7)
-    return hist
-
-
 # Branje in predobdelava podatkov
 def preprocess_data():
     imageslbp = []
@@ -69,11 +85,14 @@ def preprocess_data():
                 print(face_image.shape)
                 height, width, _ = face_image.shape
                 face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2GRAY)
-                img_lbp = np.zeros((height,width),np.uint8)
+                img_lbp = np.zeros((height, width), np.uint8)
                 for i in range(0, height):
                     for j in range(0, width):
                         img_lbp[i, j] = lbp_calculated_pixel(face_image, i, j)
+                imageslbp.append(img_lbp)
 
+    print(imageslbp)
+    cv2.imshow("gds", imageslbp[0])
     cv2.waitKey()
     return images, labels
 
@@ -81,4 +100,4 @@ def preprocess_data():
 preprocess_data()
 cv2.waitKey()
 
-cv2.destroyAllWindows()
+cv2.destroyAllWindows()"""
