@@ -17,6 +17,45 @@ mydb = myclient["vidPro"]
 mycol = mydb["images"]
 
 
+def shraniSliko(img, team):
+    slika_bin = cv2.imencode('.png', img)[1].tobytes()
+
+    mydict = {
+        "image": Binary(slika_bin),
+        "isTeam": team
+    }
+
+    x = mycol.insert_one(mydict)
+
+    if x.inserted_id:
+        print("Slika uspešno shranjena v MongoDB.")
+    else:
+        print("Prišlo je do napake pri shranjevanju slike v MongoDB.")
+
+
+def dobiSlike():
+    documents = mycol.find()
+
+    # Seznam za shranjevanje slik
+    slike = []
+
+    # Iteracija čez dokumente
+    for document in documents:
+        # Pridobite binarne podatke slike iz dokumenta
+        image_data = document["image"]
+
+        # Pretvorite binarne podatke v numpy array
+        nparr = np.frombuffer(image_data, np.uint8)
+
+        # Dekodirajte numpy array v sliko z uporabo OpenCV
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        # Dodajte sliko v seznam
+        slike.append(image)
+
+    return slike
+
+
 def zaznajObrazKamera():
     video_capture = cv2.VideoCapture(0)
 
@@ -78,7 +117,6 @@ mydict = {
     "image": Binary(image_data),
     "isTeam": "1"
 }
-#mydict = { "image": "John", "isTeam": "1" }
 
 x = mycol.insert_one(mydict)
 
@@ -112,9 +150,36 @@ option = int(input('Enter your choice: '))
 if option == 1:
     print('Dodaj novo osebo preko kamere')
     img = zaznajObrazKamera()
+    shraniSliko(img, 1)
 elif option == 2:
     print('Dodaj novo osebo z sliko')
     img = zaznajObrazSlika('lenna.png')
+    shraniSliko(img, 1)
+elif option == 3:
+    slike = dobiSlike()
+    cv2.imshow("Slika", slike[1])
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    """print('Prikazi sliko iz baze')
+    document = mycol.find_one({"isTeam": "0"})
+
+    # Preverite, ali je dokument najden
+    if document:
+        # Pridobite binarne podatke slike iz dokumenta
+        image_data = document["image"]
+
+        # Pretvorite binarne podatke v numpy array
+        nparr = np.frombuffer(image_data, np.uint8)
+
+        # Dekodirajte numpy array v sliko z uporabo OpenCV
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        # Prikažite sliko z uporabo OpenCV
+        cv2.imshow("Slika", image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    else:
+        print("Dokument s sliko ni bil najden v MongoDB.")"""
 """face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 skupina = 1
 drugo = 0
