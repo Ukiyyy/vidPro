@@ -161,6 +161,21 @@ def izlocanjeZnacilnic():
     return imageslbp
 
 
+def primerjajObraze(slika):
+    cv2.imshow("img", slika)
+
+
+    slike = dobiSlike()
+
+
+    for i in slike:
+        cv2.imshow("izB", i)
+        cv2.waitKey()
+
+
+
+
+
 # Za shranjevanje obrazov. Opcija 3 za testiranje, ce je slika v bazi
 option = int(input('Enter your choice: '))
 if option == 1:
@@ -174,6 +189,12 @@ elif option == 2:
 elif option == 3:
     slike = dobiSlike()
     cv2.imshow("Slika", slike[1])
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+elif option == 4:
+    slike = zaznajObrazKamera()
+    primerjajObraze(slike)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 cv2.waitKey()
