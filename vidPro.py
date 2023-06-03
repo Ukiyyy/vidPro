@@ -148,7 +148,11 @@ def lbp_zracunan_piksel(img, x, y):
 def izlocanjeZnacilnic():
     slike = dobiSlike()
     imageslbp = []
-    labels = []
+    labels = []  # Zbirka oznak
+
+    x=0
+    desired_size = (100, 100)  # Fixed size for LBP feature images
+
     for slika in slike:
         height, width, _ = slika.shape
         face_image = cv2.cvtColor(slika, cv2.COLOR_BGR2GRAY)
@@ -156,21 +160,59 @@ def izlocanjeZnacilnic():
         for i in range(0, height):
             for j in range(0, width):
                 img_lbp[i, j] = lbp_zracunan_piksel(face_image, i, j)
-        imageslbp.append(img_lbp)
 
-    return imageslbp
+        # Resize the LBP feature image to a fixed size
+        img_lbp_resized = cv2.resize(img_lbp, desired_size)
+
+        # Flatten the LBP feature image to a 1-dimensional array
+        img_lbp_flattened = img_lbp_resized.flatten()
+
+        imageslbp.append(img_lbp_flattened)
+
+        # Dodajanje ustrezne oznake za trenutno sliko
+        # Predpostavimo, da je vsaka slika povezana z razredom osebe, ki jo predstavlja
+        if x%2==0:
+            labels.append(1)  # Primer: 1 pomeni osebo, 0 pomeni drugo kategorijo (npr. ni oseba)
+        else:
+           labels.append(0)  # Represents class 0 (e.g., non-person)
+
+        x=x+1
+
+    return imageslbp, labels
 
 
 def primerjajObraze(slika):
-    cv2.imshow("img", slika)
-
-
     slike = dobiSlike()
+    imageslbp, labels = izlocanjeZnacilnic()
 
+    # Pretvorba slik v seznam numpy array
+    X = np.array(imageslbp)
+    y = np.array(labels)
 
-    for i in slike:
-        cv2.imshow("izB", i)
-        cv2.waitKey()
+    # Delitev podatkov na učno in testno množico
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Ustvarjanje SVM modela
+    model = SVC(kernel='linear')
+    model.fit(X_train, y_train)
+
+    # Pretvorba poslane slike v znacilnice LBP
+    height, width, _ = slika.shape
+    face_image = cv2.cvtColor(slika, cv2.COLOR_BGR2GRAY)
+    img_lbp = np.zeros((height, width), np.uint8)
+    for i in range(0, height):
+        for j in range(0, width):
+            img_lbp[i, j] = lbp_zracunan_piksel(face_image, i, j)
+    test_image = cv2.resize(img_lbp, (100, 100)).flatten()
+
+    # Napovedovanje prepoznavanja osebe
+    prediction = model.predict([test_image])
+
+    # Preverjanje ujemanja in izpis rezultata
+    if prediction in y_train:
+        print("Ujema se")
+    else:
+        print("Ne ujema se")
 
 
 
