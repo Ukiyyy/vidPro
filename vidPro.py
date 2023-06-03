@@ -171,12 +171,11 @@ def izlocanjeZnacilnic():
 
         # Dodajanje ustrezne oznake za trenutno sliko
         # Predpostavimo, da je vsaka slika povezana z razredom osebe, ki jo predstavlja
-        if x%2==0:
-            labels.append(1)  # Primer: 1 pomeni osebo, 0 pomeni drugo kategorijo (npr. ni oseba)
-        else:
-           labels.append(0)  # Represents class 0 (e.g., non-person)
 
-        x=x+1
+    documents = mycol.find()
+    for document in documents:
+        # Pridobite binarne podatke slike iz dokumenta
+        labels.append(document["isTeam"])
 
     return imageslbp, labels
 
